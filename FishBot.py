@@ -13,7 +13,7 @@ WINDOW_WIDTH = 0
 WINDOW_HEIGHT = 0
 SEARCH_BOX = 4*[0]  # [x0, x1, y0, y1]
 FISH_KEY = []
-TIME_FISHING = 0  # Time (s)
+TIME_FISHING = 3600  # Time (s)
 REACTION_TIME = 0.3  # Reaction time to loot hook
 
 
@@ -50,7 +50,7 @@ def run():
                     print("No fish caught.")
         logout()
         if time.time() - start_time <= TIME_FISHING:
-            anti_afk()
+            anti_bot_detection()  # Default 10-15 min
 
 
 # Set World of Warcraft in focus.
@@ -87,7 +87,6 @@ def find_hook():
             current_mouse = win32gui.GetCursorInfo()[1]
             if current_mouse != old_mouse:
                 print("Hook found!")
-                time.sleep(.1)
                 return True
     return False
 
@@ -107,13 +106,10 @@ def login():
 # Logout function, sleep for 25 seconds
 def logout():
     print("Logging out.")
-    menu_x = int(round(WINDOW_WIDTH/1.56))
-    menu_y = int(round(WINDOW_HEIGHT/1.07))
+    hold_key('esc')
+    release_key('esc')
     logout_x = int(round(WINDOW_WIDTH/2))
     logout_y = int(round(WINDOW_HEIGHT/1.93))
-    mouse_pos((menu_x, menu_y))
-    left_click()
-    time.sleep(1)
     mouse_pos((logout_x, logout_y))
     left_click()
     time.sleep(25)
@@ -124,17 +120,22 @@ def fish_session(t_0=900, t_final=1200):
     return uniform(t_0, t_final)
 
 
-# Anti AFK function at login screen. Default value is uniformly picked between 10 and 15 minutes.
-def anti_afk(t_0=600, t_final=900):
+# Anti bot detection function at login screen. Default value is uniformly picked between 10 and 15 minutes.
+def anti_bot_detection(t_0=600, t_final=900):
     mouse_pos((SEARCH_BOX[0], SEARCH_BOX[2]))
-    afk_time = time.time()+uniform(t_0, t_final)
-    while time.time() <= afk_time:
-        hold_key('down_arrow')
-        release_key('down_arrow')
-        time.sleep(5)
-        hold_key('up_arrow')
-        release_key('up_arrow')
-        time.sleep(5)
+    #  Select anti-bot character
+    hold_key('down_arrow')
+    release_key('down_arrow')
+    login()
+    bot_char_time = time.time()+uniform(t_0, t_final)
+    while time.time() <= bot_char_time:
+        hold_key('spacebar', time_sleep=1)
+        release_key('spacebar', time_sleep=1)
+        time.sleep(120)
+    logout()
+    #  Select original character
+    hold_key('up_arrow')
+    release_key('up_arrow')
 
 
 # Loot bobber
@@ -147,13 +148,13 @@ def loot_hook():
     mouse_pos((SEARCH_BOX[0], SEARCH_BOX[2]))
 
 
-# Cast bobber, sleep between 0 to 3 seconds for realistic appearance.
+# Cast bobber, sleep between 0.1 to 3 seconds for realistic appearance.
 def fish(button):
-    time.sleep(uniform(0, 3))
+    time.sleep(uniform(0.1, 3))
     hold_key(button)
     release_key(button)
     print("Casting bobber.")
-    time.sleep(1)
+    time.sleep(2)
 
 
 def main():
