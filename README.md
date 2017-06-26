@@ -1,2 +1,2 @@
 # FishingBot
-Sound-based fishing bot
+Vanilla World of Warcraft sound-based fishing bot.
